@@ -4,18 +4,18 @@ import java.util.List;
 public class Subject {
 
     // 과목 고유번호
-    private Long subjectId;
+    private Long subjectId = 0L;
 
     // 과목병
     private String subjectName;
 
     // 과목타입
-    private String subjectType;
+    private CourseType subjectType;
 
     // 학생 리스트
     private List<Student> studentList;
 
-    Subject(String subjectName, String subjectType){
+    Subject(String subjectName, CourseType subjectType){
         this.subjectId = ++subjectId;
         this.subjectName = subjectName;
         this.subjectType = subjectType;
