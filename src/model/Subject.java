@@ -1,27 +1,24 @@
 package model;
 
 public class Subject {
-    private String subjectId;
-    private String subjectName;
-    private String subjectType;
+    public enum SUBJECT_TYPE { SUBJECT_TYPE_MANDATORY, SUBJECT_TYPE_CHOICE };
 
-    public Subject(String seq, String subjectName, String subjectType) {
-        this.subjectId = seq;
+    private Long subjectId;
+    private String subjectName;
+    private SUBJECT_TYPE subjectType;
+
+    public Subject(Long subjectId, String subjectName, SUBJECT_TYPE subjectType) {
+        this.subjectId = subjectId;
         this.subjectName = subjectName;
         this.subjectType = subjectType;
     }
 
     // Getter
-    public String getSubjectId() {
-        return subjectId;
-    }
-
+    public Long getSubjectId() { return subjectId; }
     public String getSubjectName() {
         return subjectName;
     }
-
-    public String getSubjectType() {
+    public SUBJECT_TYPE getSubjectType() {
         return subjectType;
     }
-
 }
