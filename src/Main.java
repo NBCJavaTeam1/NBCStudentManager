@@ -2,9 +2,7 @@ import model.Score;
 import model.Student;
 import model.Subject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Notification
@@ -15,6 +13,9 @@ import java.util.Scanner;
  * 구현에 도움을 주기위한 Base 프로젝트입니다. 자유롭게 이용해주세요!
  */
 public class Main {
+    // 오류방지용 임시 객체
+    private static List<Long> tmpSubjects = new ArrayList<Long>();
+
     // 데이터 저장소
     private static List<Student> studentStore;
     private static List<Subject> subjectStore;
@@ -25,11 +26,11 @@ public class Main {
     private static String SUBJECT_TYPE_CHOICE = "CHOICE";
 
     // index 관리 필드
-    private static int studentIndex;
+    private static long studentIndex;
     private static final String INDEX_TYPE_STUDENT = "ST";
-    private static int subjectIndex;
+    private static long subjectIndex;
     private static final String INDEX_TYPE_SUBJECT = "SU";
-    private static int scoreIndex;
+    private static long scoreIndex;
     private static final String INDEX_TYPE_SCORE = "SC";
 
     // 스캐너
@@ -47,51 +48,52 @@ public class Main {
     // 초기 데이터 생성
     private static void setInitData() {
         studentStore = new ArrayList<>();
+        tmpSubjects = List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L );
         subjectStore = List.of(
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "Java",
-                        SUBJECT_TYPE_MANDATORY
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "객체지향",
-                        SUBJECT_TYPE_MANDATORY
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "Spring",
-                        SUBJECT_TYPE_MANDATORY
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "JPA",
-                        SUBJECT_TYPE_MANDATORY
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "MySQL",
-                        SUBJECT_TYPE_MANDATORY
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "디자인 패턴",
-                        SUBJECT_TYPE_CHOICE
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "Spring Security",
-                        SUBJECT_TYPE_CHOICE
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "Redis",
-                        SUBJECT_TYPE_CHOICE
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE
                 ),
                 new Subject(
-                        sequence(INDEX_TYPE_SUBJECT),
+                        subjectIndex++,
                         "MongoDB",
-                        SUBJECT_TYPE_CHOICE
+                        Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE
                 )
         );
         scoreStore = new ArrayList<>();
@@ -169,7 +171,9 @@ public class Main {
         String studentName = sc.next();
         // 기능 구현 (필수 과목, 선택 과목)
 
-        Student student = new Student(sequence(INDEX_TYPE_STUDENT), studentName); // 수강생 인스턴스 생성 예시 코드
+
+        // tmpSubject : 오류 방지용 임시 객체
+        Student student = new Student(studentIndex++, studentName, tmpSubjects ); // 수강생 인스턴스 생성 예시 코드
         // 기능 구현
         System.out.println("수강생 등록 성공!\n");
     }
@@ -228,11 +232,91 @@ public class Main {
         System.out.println("\n점수 수정 성공!");
     }
 
+    private static String getSubjectName() {
+        System.out.print("\n과목 이름을 입력하시오...");
+        return sc.next();
+    }
+
+    private static String getRound() {
+        System.out.print("\n회차를 입력하시오...");
+        return sc.next();
+    }
+
+    // 학생을 찾는 함수
+    private static Student findStudentById(Long studentId) {
+        Student[] result = studentStore.stream()
+                .filter((s)->s.getStudentId().equals(studentId))
+                .toArray(Student[]::new);
+
+        if(result.length == 0) {
+            return null;
+        }
+        return result[0];
+    }
+
+    private static Subject findSubjectByName(String subjectName) {
+        Subject[] result = subjectStore.stream()
+                .filter((s) ->s.getSubjectName().equals(subjectName))
+                .toArray(Subject[]::new);
+
+        if(result.length == 0) {
+            return null;
+        }
+        return result[0];
+    }
+
+    private static Score[] findScoreBySubjectName(String subjectName) {
+        Score[] result = scoreStore.stream()
+                .filter((s) ->s.getSubjectName().equals(subjectName))
+                .toArray(Score[]::new);
+
+        if(result.length == 0) {
+            return null;
+        }
+        return result;
+    }
+
+    private static boolean isBeInClass(Student student, Subject subject) {
+        List<Long> subjects = student.getSubjects();
+
+        Long[] result = subjects.stream()
+                .filter((s)->s.equals(subject.getSubjectId()))
+                .toArray(Long[]::new);
+
+        return result.length > 0;
+    }
+
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
+        Long studentId = Long.parseLong(getStudentId()); // 관리할 수강생 고유 번호
+        Student student = findStudentById(studentId);
+
+        // 수강생이 존재하지 않은 경우
+        if(student == null) {
+            System.out.println("수강생이 존재하지 않습니다.");
+            return;
+        }
+
+        String subjectName = getSubjectName();
+        Subject foundSubject = findSubjectByName(subjectName);
+
+        if(foundSubject == null) {
+            System.out.println("강의가 존재하지 않습니다.");
+            return;
+        } else if(isBeInClass(student, foundSubject)) {
+            System.out.println(student.getStudentName() + " 학생은 " + foundSubject.getSubjectName() + " 강의를 수강하지 않습니다");
+            return;
+        }
+
+        int round = Integer.parseInt(getRound());
+        Score[] subjectScores = findScoreBySubjectName(subjectName);
+
+        if(subjectScores == null) {
+            System.out.println("시험을 본 이력이 존재하지 않습니다.");
+        }
+
         // 기능 구현 (조회할 특정 과목)
-        System.out.println("회차별 등급을 조회합니다...");
+
         // 기능 구현
         System.out.println("\n등급 조회 성공!");
     }
