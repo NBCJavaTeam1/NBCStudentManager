@@ -117,7 +117,7 @@ public class Main {
         }
     }
 
-    private static void displayMainView() throws InterruptedException {
+    private static void displayMainView() throws Exception, InterruptedException {
         boolean flag = true;
         while (flag) {
             System.out.println("\n==================================");
@@ -185,7 +185,7 @@ public class Main {
         System.out.println("\n수강생 목록 조회 성공!");
     }
 
-    private static void displayScoreView() {
+    private static void displayScoreView() throws Exception {
         boolean flag = true;
         while (flag) {
             System.out.println("==================================");
@@ -254,9 +254,40 @@ public class Main {
 
 
     // 수강생의 과목별 회차 점수 수정
-    private static void updateRoundScoreBySubject() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
+    private static void updateRoundScoreBySubject() throws Exception{
+        if(scoreStore.isEmpty()){
+            throw new Exception("점수 데이터가 존재하지 않습니다.");
+        }
+
+        String insertStudentId = getStudentId(); // 관리할 수강생 고유 번호
+
+        System.out.print("\n수정하실 과목을 입력하세요");
+        String insertSubjectId = sc.next();
+
+        System.out.print("\n수정하실 과목을 시험회차를 입력하세요");
+        int insertRound = sc.nextInt();
+
+        System.out.print("\n수정하실 점수를 입력해주세요.");
+        int insertScore = sc.nextInt();
+
         // 기능 구현 (수정할 과목 및 회차, 점수)
+        for(int i = 0; i < Score.round; i++){
+            Long studentId = scoreStore.get(i).getStudentId();
+            Long subjectId = scoreStore.get(i).getSubjectId();
+            // 반목문을 돌면서 찾으려는 학생의 과목의 점수표를 찾는다
+            if(insertSubjectId.equals(studentId) && insertStudentId.equals(subjectId)){
+                // 해당 점수표를 가져온다
+                int[] scores = scoreStore.get(i).getScores();
+                // 점수표의 원하는 회차의 점수를 수정한다
+                scores[insertRound] = insertScore;
+                scoreStore.get(i).setScores(scores);
+
+                // 점수가 바뀌었으니 랭크도 바꿔준다
+                // 점수 변경
+                scoreStore.get(i).init(insertRound, insertScore);
+            }
+        }
+
         System.out.println("시험 점수를 수정합니다...");
         // 기능 구현
         System.out.println("\n점수 수정 성공!");
