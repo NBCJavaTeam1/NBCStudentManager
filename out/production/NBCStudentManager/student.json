@@ -1,0 +1,14 @@
+{
+  "Student:": {
+    "studentName": "건우",
+    "studentID": 10,
+    "subjects": [
+      {
+        "subject": 1
+      },
+      {
+        "subject": 2
+      }
+    ]
+  }
+}
