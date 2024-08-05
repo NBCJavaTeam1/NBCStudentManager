@@ -1,9 +1,7 @@
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +24,36 @@ public class DataManager<T> {
         }
     }
 
-    // .json 파일을 읽어와서 FileReader로 생성하는 함수 ( 없을시 파일 생성 )
-    public Reader loadFileReader(String fileName) throws Exception {
+    // File을 생성 함수( File이 존재하지 않을 경우 생성 )
+    public File openFile(String fileName) throws Exception {
         File file = new File(DIRECTORY + FILE_PATH + fileName + FILE_EXTENSION);
 
         if(!file.exists()) {
             file.createNewFile();
         }
 
+        return file;
+    }
+    // .json 파일을 읽어와서 FileReader로 생성하는 함수 ( 없을시 파일 생성 )
+    public Reader loadFileReader(String fileName) throws Exception {
+        File file = openFile(fileName);
         return new FileReader(file);
     }
 
-    public void saveDatas(List<T> lists) {
-        gson.toJson(lists, System.out);
+    // .json 파일을 읽어와서 FileReader로 생성하는 함수 ( 없을시 파일 생성 )
+    public Writer writeFileReader(String fileName) throws Exception {
+        File file = openFile(fileName);
+        return new FileWriter(file);
+    }
+
+    public void saveDatas(String fileName, List<T> lists) throws Exception {
+        String jsonData = gson.toJson(lists);
+        Writer reader = writeFileReader(fileName);
+
+        reader.write(jsonData);
+        reader.close();
+
+        System.out.println(jsonData);
     }
 
     public List<T> loadDatas(String fileName, Class<T> myType) throws Exception  {
@@ -49,6 +64,7 @@ public class DataManager<T> {
 
         Type listType = TypeToken.getParameterized(List.class, myType).getType();
 
+        reader.close();
         return gson.fromJson(jsonObject, listType);
     }
 }

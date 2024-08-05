@@ -13,7 +13,7 @@ public class Score {
     private int[] scores = new int[round]; // 10회차 점수배열, 각 배열의 인덱스가 회차이다 -> scores[0]는 1회차 시험 점수
     private char[] ranks = new char[round]; // 10회차 등급배열, ranks[0]는 1회차 시험 등급
 
-    Score(Long studentId, Long subjectId){
+    public Score(Long studentId, Long subjectId){
         Arrays.fill(this.scores, -1);// 입력되지 않은 값은 -1로 한다. 기본 초기화값이 0인데, 0점을 받는 학생도 있을 수 있기 때문
         Arrays.fill(this.ranks, ' ');
         this.studentId = studentId;
