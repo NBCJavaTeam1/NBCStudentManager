@@ -3,6 +3,8 @@ import model.Student;
 import model.Subject;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Notification
@@ -13,6 +15,15 @@ import java.util.*;
  * 구현에 도움을 주기위한 Base 프로젝트입니다. 자유롭게 이용해주세요!
  */
 public class Main {
+
+    // 숫자만 입력가능 패턴
+    private static String PATTERN_ONLY_INTEGER = "\\d+";
+    // 1~10 까지만 입력가능 패턴
+    private static String PATTERN_ONLY_1_BETWEEN_10 = "^(10|[1-9])$";
+    // 0~100 까지만 입력가능 패턴
+    private static String PATTERN_ONLY_0_BETWEEN_100 = "^(100|[1-9]?[0-9])$";
+
+
     // 오류방지용 임시 객체
     private static List<Long> tmpSubjects = new ArrayList<Long>();
 
@@ -211,7 +222,36 @@ public class Main {
     }
 
     private static String getStudentId() {
-        System.out.print("\n관리할 수강생의 번호를 입력하시오...");
+        System.out.print("관리할 수강생의 번호를 입력하시오...\n");
+
+        // 수강생들의 아이디를 출력
+        for(Student student : studentStore){
+            System.out.println(student.getStudentId() + ". " + student.getStudentName());
+        }
+
+        return sc.next();
+    }
+
+    private static String getSubjectId(String studentId) {
+
+        System.out.print("수정하실 과목을 입력하세요.\n");
+
+        // 타입이 안맞아서 안나오기 때문에 형변환이 필요함
+        Long longStudentId = Long.parseLong(studentId);
+
+        List<Long> studentSubjects  = studentStore.stream()
+                .filter(student -> student.getStudentId().equals(longStudentId))
+                .map(Student::getSubjects)
+                .findFirst().get();
+
+        // subjectIndex 값이 ids 리스트에 있는 Subject를 찾기
+        List<Subject> matchingSubjects = subjectStore.stream()
+                .filter(subject -> studentSubjects.contains((long) subject.getSubjectId()))
+                .collect(Collectors.toList());
+
+        matchingSubjects.forEach(subject ->
+                System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName()));
+
         return sc.next();
     }
 
@@ -254,43 +294,64 @@ public class Main {
 
 
     // 수강생의 과목별 회차 점수 수정
-    private static void updateRoundScoreBySubject() throws Exception{
-        if(scoreStore.isEmpty()){
-            throw new Exception("점수 데이터가 존재하지 않습니다.");
-        }
-
-        String insertStudentId = getStudentId(); // 관리할 수강생 고유 번호
-
-        System.out.print("\n수정하실 과목을 입력하세요");
-        String insertSubjectId = sc.next();
-
-        System.out.print("\n수정하실 과목을 시험회차를 입력하세요");
-        int insertRound = sc.nextInt();
-
-        System.out.print("\n수정하실 점수를 입력해주세요.");
-        int insertScore = sc.nextInt();
-
-        // 기능 구현 (수정할 과목 및 회차, 점수)
-        for(int i = 0; i < Score.round; i++){
-            Long studentId = scoreStore.get(i).getStudentId();
-            Long subjectId = scoreStore.get(i).getSubjectId();
-            // 반목문을 돌면서 찾으려는 학생의 과목의 점수표를 찾는다
-            if(insertSubjectId.equals(studentId) && insertStudentId.equals(subjectId)){
-                // 해당 점수표를 가져온다
-                int[] scores = scoreStore.get(i).getScores();
-                // 점수표의 원하는 회차의 점수를 수정한다
-                scores[insertRound] = insertScore;
-                scoreStore.get(i).setScores(scores);
-
-                // 점수가 바뀌었으니 랭크도 바꿔준다
-                // 점수 변경
-                scoreStore.get(i).init(insertRound, insertScore);
+    private static void updateRoundScoreBySubject() {
+        boolean flag = true;
+        while (flag){
+            if(scoreStore.isEmpty()) {
+                System.out.print("점수 데이터가 존재하지 않습니다. 이전 단계로 이동합니다.\n");
+                flag = false;
+                break;
             }
+
+            String insertStudentId = getStudentId(); // 관리할 수강생 고유 번호
+            if(!checkPattern(PATTERN_ONLY_INTEGER, insertStudentId)) {
+                System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
+                break;
+            }
+
+            String insertSubjectId = getSubjectId(insertStudentId);
+            if(!checkPattern(PATTERN_ONLY_INTEGER, insertSubjectId)) {
+                System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
+                break;
+            }
+
+            System.out.print("\n수정하실 과목을 시험회차를 입력하세요. (1~10 회차 중 선택)");
+            int insertRound = sc.nextInt();
+            if(!checkPattern(PATTERN_ONLY_1_BETWEEN_10, String.valueOf(insertSubjectId))) {
+                System.out.println("잘못된 입력 형태입니다. 시험회차는 1~10 까지의 숫자만 입력가능합니다.\n이전 단계로 이동...");
+                break;
+            }
+
+            System.out.print("\n수정하실 점수를 입력해주세요.");
+            int insertScore = sc.nextInt();
+            if(!checkPattern(PATTERN_ONLY_0_BETWEEN_100, String.valueOf(insertScore))) {
+                System.out.println("잘못된 입력 형태입니다. 점수는 0~100 까지의 숫자만 입력가능합니다.\n이전 단계로 이동...");
+                break;
+            }
+
+            boolean checkStudentSubject = scoreStore.stream()
+                    .filter(score -> Long.parseLong(insertStudentId) == (score.getStudentId()) &&
+                            Long.parseLong(insertSubjectId) == (score.getSubjectId()))
+                    .findFirst() // 첫 번째 일치하는 요소를 찾습니다.
+                    .map(score -> {
+                        int[] scores = score.getScores();
+
+                        scores[insertRound - 1] = insertScore;
+                        score.setScores(scores);
+
+                        // 점수가 바뀌었으니 랭크도 바꿔준다
+                        score.init(insertRound - 1, insertScore);
+
+                        System.out.println("\n점수 수정 성공!");
+                        return true;
+                    }).orElseGet(() -> {
+                        System.out.println("해당 학생이나 과목을 찾을 수 없습니다.");
+                        return false;
+                    });
+
+            flag = false;
         }
 
-        System.out.println("시험 점수를 수정합니다...");
-        // 기능 구현
-        System.out.println("\n점수 수정 성공!");
     }
 
     private static String getSubjectName() {
@@ -380,6 +441,10 @@ public class Main {
 
         // 기능 구현
         System.out.println("\n등급 조회 성공!");
+    }
+
+    private static <T> boolean checkPattern(String pattern, T t){
+        return Pattern.matches(pattern, (CharSequence) t);
     }
 
 }
