@@ -67,10 +67,6 @@ public class Main {
         dataManager = new DataManager();
         dataManager.directoryInitialize();
 
-        scoreStore = new ArrayList<>();
-        scoreStore.add(new Score(0L, 1L));
-        scoreStore.add(new Score(1L, 2L));
-
         studentStore = dataManager.loadDatas("student", Student.class);
         scoreStore = dataManager.loadDatas("score", Score.class);
 
@@ -612,7 +608,7 @@ public class Main {
                 break;
             }
 
-            String insertStudentId = getStudentId(); // 관리할 수강생 고유 번호
+            String insertStudentId = String.valueOf(getStudentId()); // 관리할 수강생 고유 번호
             if(!checkPattern(PATTERN_ONLY_INTEGER, insertStudentId)) {
                 System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
                 break;
@@ -644,12 +640,10 @@ public class Main {
                     .findFirst() // 첫 번째 일치하는 요소를 찾습니다.
                     .map(score -> {
                         int[] scores = score.getScores();
-
                         scores[insertRound - 1] = insertScore;
-                        score.setScores(scores);
 
                         // 점수가 바뀌었으니 랭크도 바꿔준다
-                        score.init(insertRound - 1, insertScore);
+                        score.setScores(insertRound - 1, insertScore);
 
                         System.out.println("\n점수 수정 성공!");
                         return true;
@@ -719,7 +713,7 @@ public class Main {
     }
 
     // 수강생의 특정 과목 회차별 등급 조회
-    private static void inquireRoundGradeBySubject() {
+    private static Student getStudentByInput() throws Exception {
         Long studentId = getStudentId(); // 관리할 수강생 고유 번호
         Student student = findStudentById(studentId);
 
