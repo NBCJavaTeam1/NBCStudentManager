@@ -404,24 +404,34 @@ public class Main {
         }
     }
 
-    private static String getStudentId() {
+    private static Long getStudentId() {
         System.out.print("\n관리할 수강생의 번호를 입력하시오...");
-        return sc.next();
+        Long sId = sc.nextLong();
+        sc.nextLine();
+        return sId;
     }
 
     // 수강생의 과목별 시험 회차 및 점수 등록
     private static void createScore() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
+        Long studentId = getStudentId(); // 관리할 수강생 고유 번호
         System.out.println("시험 점수를 등록합니다...");
         // 기능 구현
+        boolean addflag = false;
+        Long subId = 0L;
+        String subType = "";
+        int round;
+        int score;
 
         while(true){ // 올바른 과목명을 입력할 때 까지 무한 반복
             boolean scoreflag = false; // 올바른 과목명일 경우 true로 만들어 반복문을 탈출하기 위한 flag
             System.out.println("등록할 과목을 입력하세요 : ");
             String sub = sc.nextLine();
+
             for(int i=0;i<subjectStore.size();i++){
-                if(sub.equals(subjectStore.get(i).getSubjectName())){ //subjectStore를 순회하며 각 내용물 객체의 getSubjectName()을 호출하여 입력값과 비요
+                if(sub.equals(subjectStore.get(i).getSubjectName())){ //subjectStore를 순회하며 각 내용물 객체의 getSubjectName()을 호출하여 입력값과 비교
                     scoreflag = true;
+                    subId = subjectStore.get(i).getSubjectId();
+                    subType = String.valueOf(subjectStore.get(i).getSubjectType());
                     break;
                 }
             }
@@ -432,24 +442,83 @@ public class Main {
                 System.out.println("올바른 과목명을 입력하세요");
         }
 
-//        while(true){
-//            boolean scoreflag = false;
-//            System.out.println("등록할 회차를 입력하세요 : ");
-//            int round = sc.nextInt()+1;
-//            if(round<1 && round > 10){
-//
-//            }
-//        }
+        while(true){
+            try{
+                System.out.println("등록할 회차를 입력하세요 : ");
+                round = sc.nextInt()-1;
+                sc.nextLine();
+                if(round<0 || round > 9){
+                    System.out.println("1부터 10까지의 숫자 중 하나를 입력하세요");
+                    continue;
+                }
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){ //숫자 이외의 값이 입력된다면 예외처리
+                System.out.println("1부터 10까지의 숫자 중 하나를 입력하세요");
+                continue;
+            }
 
-        //System.out.println("등록할 점수를 입력하세요 : ");
-        int score = sc.nextInt();
+        }
+        while(true){
+            try{
+                System.out.println("등록할 점수를 입력하세요 : ");
+                score = sc.nextInt();
+                sc.nextLine();
+                if(score<0 || score>100){
+                    System.out.println("0부터 100까지의 정수중 하나를 입력하세요");
+                    continue;
+                }
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("0부터 100까지의 정수중 하나를 입력하세요");
+                continue;
+            }
+        }
+        Score s = new Score(studentId,subId,subType);
+        s.setScores(round,score);
+        if(!scoreStore.isEmpty()){
+            for(int i=0;i<scoreStore.size();i++){
+                if(studentId.equals(scoreStore.get(i).getStudentId()) && subId.equals(scoreStore.get(i).getSubjectId())){
+                    int[] tempS = Arrays.copyOf(scoreStore.get(i).getScores(), scoreStore.get(i).getScores().length);
+                    if(tempS[round]!=-1){
+                        System.out.println("이미 등록된 회차 입니다.");
+                        
+                        // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
+                        for(int k=0;k<scoreStore.size();k++){
+                            System.out.println(Arrays.toString(scoreStore.get(k).getScores()) + ", "+ scoreStore.get(k).getStudentId()+", "+scoreStore.get(k).getSubjectId());
+                        }
+                        return;
+                    }
+                    else{
+                        addflag = true;
+                        tempS[round] = score;
+                        scoreStore.get(i).setScores(round,score);
+                        break;
+                    }
+                }
+            }
+            if(!addflag){
+                scoreStore.add(s);
+            }
+        }
+        else
+            scoreStore.add(s);
+
+        // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
+        for(int i=0;i<scoreStore.size();i++){
+            System.out.println(Arrays.toString(scoreStore.get(i).getScores())+", "+ scoreStore.get(i).getStudentId()+", "+scoreStore.get(i).getSubjectId());
+        }
+
         System.out.println("\n점수 등록 성공!");
     }
 
 
     // 수강생의 과목별 회차 점수 수정
     private static void updateRoundScoreBySubject() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
+        Long studentId = getStudentId(); // 관리할 수강생 고유 번호
         // 기능 구현 (수정할 과목 및 회차, 점수)
         System.out.println("시험 점수를 수정합니다...");
         // 기능 구현
@@ -512,7 +581,7 @@ public class Main {
 
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject() {
-        Long studentId = Long.parseLong(getStudentId()); // 관리할 수강생 고유 번호
+        Long studentId = getStudentId(); // 관리할 수강생 고유 번호
         Student student = findStudentById(studentId);
 
         // 수강생이 존재하지 않은 경우
