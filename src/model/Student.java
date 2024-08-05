@@ -20,7 +20,7 @@ public class Student {
 
     // Getter
     public Long getStudentId() {
-        return studentId;
+        return studentId; //push 실험
     }
     public String getStudentName() {
         return studentName;
