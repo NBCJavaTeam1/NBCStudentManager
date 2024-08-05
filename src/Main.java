@@ -100,19 +100,17 @@ public class Main {
     }
 
     // index 자동 증가
-    private static String sequence(String type) {
+    private static Long sequence(String type) {
         switch (type) {
+            // sequence 사용을 위해 Long으로 수정함
             case INDEX_TYPE_STUDENT -> {
-                studentIndex++;
-                return INDEX_TYPE_STUDENT + studentIndex;
+                return studentIndex++;
             }
             case INDEX_TYPE_SUBJECT -> {
-                subjectIndex++;
-                return INDEX_TYPE_SUBJECT + subjectIndex;
+                return subjectIndex++;
             }
             default -> {
-                scoreIndex++;
-                return INDEX_TYPE_SCORE + scoreIndex;
+                return scoreIndex++;
             }
         }
     }
@@ -148,14 +146,16 @@ public class Main {
             System.out.println("수강생 관리 실행 중...");
             System.out.println("1. 수강생 등록");
             System.out.println("2. 수강생 목록 조회");
-            System.out.println("3. 메인 화면 이동");
+            System.out.println("3. 수강생 상태 수정");  // 수정됨: 상태 수정 옵션 추가
+            System.out.println("4. 메인 화면 이동");  // 수정됨: 메뉴 번호 조정
             System.out.print("관리 항목을 선택하세요...");
             int input = sc.nextInt();
 
             switch (input) {
                 case 1 -> createStudent(); // 수강생 등록
                 case 2 -> inquireStudent(); // 수강생 목록 조회
-                case 3 -> flag = false; // 메인 화면 이동
+                case 3 -> updateStudentStatus(); // 수정됨: 수강생 상태 수정 추가
+                case 4 -> flag = false; // 수정됨: 메인 화면 이동 번호 조정
                 default -> {
                     System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
                     flag = false;
@@ -164,26 +164,220 @@ public class Main {
         }
     }
 
-    // 수강생 등록 ( 예환씨 파트 )
+    // 과목 선택 루프
     private static void createStudent() {
+        // 수강생 이름 입력
         System.out.println("\n수강생을 등록합니다...");
         System.out.print("수강생 이름 입력: ");
         String studentName = sc.next();
-        // 기능 구현 (필수 과목, 선택 과목)
+
+        List<Long> selectedSubjects = new ArrayList<>();
+        Set<Long> mandatorySubjects = new HashSet<>();  // 필수 과목을 저장할 집합
+        Set<Long> choiceSubjects = new HashSet<>();     // 선택 과목을 저장할 집합
+
+        // 과목 선택 루프
+        while (true) {
+            // 과목 선택 메뉴 출력
+            System.out.println("\n과목을 선택하세요. (필수 과목과 선택 과목을 모두 선택해야 합니다)");
+            System.out.println("1. 필수 과목 선택");
+            System.out.println("2. 선택 과목 선택");
+            System.out.println("3. 선택 완료");
+            System.out.print("옵션을 선택하세요: ");
+            int subjectOption = sc.nextInt();
+
+            if (subjectOption == 1) {
+                // 필수 과목 목록 출력
+                System.out.println("\n필수 과목 목록:");
+                for (Subject subject : subjectStore) {
+                    if (subject.getSubjectType() == Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY) {
+                        // 필수 과목일 경우 과목 ID와 이름 출력
+                        System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName());
+                    }
+                }
+
+                // 사용자가 필수 과목의 ID를 입력
+                System.out.print("필수 과목 ID를 선택하세요: ");
+                Long selectedSubjectId = sc.nextLong();
+
+                // 선택한 과목이 유효한지 확인
+                if (isValidSubject(selectedSubjectId, Subject.SUBJECT_TYPE.SUBJECT_TYPE_MANDATORY)) {
+                    // 유효하다면 selectedSubjects 리스트와 mandatorySubjects 집합에 추가
+                    if (mandatorySubjects.add(selectedSubjectId)) {  // 수정됨: 필수 과목 집합에 추가
+                        System.out.println("과목이 추가되었습니다.");
+                    } else {
+                        System.out.println("이미 선택한 과목입니다.");
+                    }
+                } else {
+                    // 유효하지 않다면 오류 메시지 출력
+                    System.out.println("잘못된 과목 ID입니다.");
+                }
+            } else if (subjectOption == 2) {
+                // 선택 과목 목록 출력
+                System.out.println("\n선택 과목 목록:");
+                for (Subject subject : subjectStore) {
+                    if (subject.getSubjectType() == Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE) {
+                        // 선택 과목일 경우 과목 ID와 이름 출력
+                        System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName());
+                    }
+                }
+
+                // 사용자가 선택 과목의 ID를 입력
+                System.out.print("선택 과목 ID를 선택하세요: ");
+                Long selectedSubjectId = sc.nextLong();
+
+                // 선택한 과목이 유효한지 확인
+                if (isValidSubject(selectedSubjectId, Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE)) {
+                    // 유효하다면 selectedSubjects 리스트와 choiceSubjects 집합에 추가
+                    if (choiceSubjects.add(selectedSubjectId)) {  // 수정됨: 선택 과목 집합에 추가
+                        System.out.println("과목이 추가되었습니다.");
+                    } else {
+                        System.out.println("이미 선택한 과목입니다.");
+                    }
+                } else {
+                    // 유효하지 않다면 오류 메시지 출력
+                    System.out.println("잘못된 과목 ID입니다.");
+                }
+            } else if (subjectOption == 3) {
+                // 과목 선택 완료
+                if (mandatorySubjects.size() >= 3 && choiceSubjects.size() >= 2) {  // 수정됨: 최소 개수 조건 확인
+                    selectedSubjects.addAll(mandatorySubjects);  // 수정됨: 필수 과목 추가
+                    selectedSubjects.addAll(choiceSubjects);     // 수정됨: 선택 과목 추가
+                    break;  // 루프 종료
+                } else {
+                    // 조건을 만족하지 않은 경우 경고 메시지 출력
+                    System.out.println("필수 과목을 최소 3개, 선택 과목을 최소 2개 선택해야 합니다.");
+                }
+            } else {
+                // 유효하지 않은 메뉴 선택
+                System.out.println("잘못된 입력입니다. 다시 시도하세요.");
+            }
+        }
+
+        // 수강생 상태 입력
+        System.out.println("\n수강생 상태를 입력하세요 (Green, Red, Yellow 중 하나): ");
+        String studentStatus;
+        while (true) {
+            studentStatus = sc.next().toUpperCase();
+            if (studentStatus.equals("GREEN") || studentStatus.equals("RED") || studentStatus.equals("YELLOW")) {
+                break;
+            } else {
+                System.out.println("잘못된 입력입니다. 상태는 Green, Red, Yellow 중 하나여야 합니다.");
+            }
+        }
+
+        // 수강생 생성 및 저장
+        Student newStudent = new Student(sequence(INDEX_TYPE_STUDENT), studentName, selectedSubjects, studentStatus);
+        studentStore.add(newStudent);
+        System.out.println("\n수강생 등록이 완료되었습니다.");
+    }
 
 
-        // tmpSubject : 오류 방지용 임시 객체
-        Student student = new Student(studentIndex++, studentName, tmpSubjects ); // 수강생 인스턴스 생성 예시 코드
-        // 기능 구현
-        System.out.println("수강생 등록 성공!\n");
+    // 과목 ID의 유효성을 검사하는 메서드
+    private static boolean isValidSubject(Long subjectId, Subject.SUBJECT_TYPE type) {
+        for (Subject subject : subjectStore) {
+            if (subject.getSubjectId().equals(subjectId) && subject.getSubjectType() == type) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 수강생 목록 조회
     private static void inquireStudent() {
-        System.out.println("\n수강생 목록을 조회합니다...");
-        // 기능 구현
-        System.out.println("\n수강생 목록 조회 성공!");
+        System.out.println("\n수강생 목록:");
+        for (Student student : studentStore) {
+            System.out.println("ID: " + student.getStudentId() + ", 이름: " + student.getStudentName() +
+                    ", 상태: " + student.getStatus() + ", 과목: " + getSubjectNames(student.getSubjects()));
+        }
     }
+
+    // 과목 ID 리스트를 받아 과목 이름 리스트를 반환하는 메서드
+    private static String getSubjectNames(List<Long> subjectIds) {
+        List<String> subjectNames = new ArrayList<>();
+        for (Long id : subjectIds) {
+            for (Subject subject : subjectStore) {
+                if (subject.getSubjectId().equals(id)) {
+                    subjectNames.add(subject.getSubjectName());
+                    break;
+                }
+            }
+        }
+        return String.join(", ", subjectNames);
+    }
+
+    // 수강생 상태 수정 (수정됨)
+    private static void updateStudentStatus2() {
+        System.out.println("\n수강생 상태를 수정합니다...");
+        System.out.print("수정할 수강생의 ID를 입력하세요: ");
+        String studentId = sc.next();
+        boolean studentFound = false;
+
+        for (Student student : studentStore) {
+            if (student.getStudentId().equals(studentId)) {
+                studentFound = true;
+                System.out.println("현재 상태: " + student.getStatus());
+                System.out.println("새로운 상태를 입력하세요 (Green, Red, Yellow 중 하나): ");
+                String newStatus;
+                while (true) {
+                    newStatus = sc.next().toUpperCase();
+                    if (newStatus.equals("GREEN") || newStatus.equals("RED") || newStatus.equals("YELLOW")) {
+                        student.setStatus(newStatus); // 수정됨: 상태 수정
+                        System.out.println("상태가 수정되었습니다.");
+                        break;
+                    } else {
+                        System.out.println("잘못된 입력입니다. 상태는 Green, Red, Yellow 중 하나여야 합니다.");
+                    }
+                }
+                break;
+            }
+        }
+
+        if (!studentFound) {
+            System.out.println("해당 ID를 가진 수강생을 찾을 수 없습니다.");
+        }
+    }
+
+    // 과목 ID를 통해 과목을 조회하는 메서드
+    private static Subject findSubjectById(Long subjectId) {
+        // 과목 저장소(subjectStore)를 순회하여 해당 ID를 가진 과목을 찾음
+        for (Subject subject : subjectStore) {
+            if (subject.getSubjectId().equals(subjectId)) {
+                return subject;  // 과목을 찾으면 반환
+            }
+        }
+        return null;  // 해당 ID의 과목이 없으면 null 반환
+    }
+
+    private static void updateStudentStatus() {
+        // 수강생 ID 입력
+        System.out.print("상태를 수정할 수강생의 ID를 입력하세요: ");
+        Long studentId = sc.nextLong();
+
+        // 해당 수강생 찾기
+        Student student = findStudentById(studentId);
+        if (student == null) {
+            System.out.println("해당 ID의 수강생을 찾을 수 없습니다.");
+            return;
+        }
+
+        // 새로운 상태 입력
+        System.out.println("새로운 상태를 입력하세요 (Green, Red, Yellow 중 하나): ");
+        String newStatus;
+        while (true) {
+            newStatus = sc.next();
+            if (newStatus.equals("Green") || newStatus.equals("Red") || newStatus.equals("Yellow")) {
+                break;  // 유효한 상태 값이 입력되면 루프 종료
+            } else {
+                System.out.println("잘못된 입력입니다. 다시 입력하세요.");
+            }
+        }
+
+        // 수강생의 상태 업데이트
+        student.setStatus(newStatus);
+        System.out.println("상태가 성공적으로 변경되었습니다.");
+    }
+
+
 
     private static void displayScoreView() {
         boolean flag = true;
