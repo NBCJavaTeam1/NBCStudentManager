@@ -1,3 +1,4 @@
+import com.google.gson.internal.bind.util.ISO8601Utils;
 import model.Score;
 import model.Student;
 import model.Subject;
@@ -143,6 +144,7 @@ public class Main {
                 return scoreIndex++;
             }
         }
+        System.out.println();
     }
 
     private static void displayMainView() throws Exception {
