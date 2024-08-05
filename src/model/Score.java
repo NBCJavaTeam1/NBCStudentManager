@@ -22,8 +22,19 @@ public class Score {
         this.subType = subtype;
     }
 
+    public Long getStudentId(){
+        return this.studentId;
+    }
 
-    public void init(int round, int score) { // round : 회차입력받기, score : 점수입력 받기
+    public Long getSubjectId(){
+        return this.subjectId;
+    }
+
+    public int[] getScores() {
+        return scores;
+    }
+
+    public void setScores(int round,int score){
         this.scores[round] = score;
         if(this.subType.equals("SUBJECT_TYPE_MANDATORY")){
             if(score>=95 && score<=100) {
@@ -66,23 +77,6 @@ public class Score {
             }
         }
 
-
-    }
-
-    public Long getStudentId(){
-        return this.studentId;
-    }
-
-    public Long getSubjectId(){
-        return this.subjectId;
-    }
-
-    public int[] getScores() {
-        return scores;
-    }
-
-    public void setScores(int round,int score){
-        init(round,score);
     }
 
     public char[] getRank() {

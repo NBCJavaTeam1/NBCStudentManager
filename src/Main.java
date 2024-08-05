@@ -284,7 +284,7 @@ public class Main {
             }
         }
         Score s = new Score(studentId,subId,subType);
-        s.init(round,score);
+        s.setScores(round,score);
         if(!scoreStore.isEmpty()){
             for(int i=0;i<scoreStore.size();i++){
                 if(studentId.equals(scoreStore.get(i).getStudentId()) && subId.equals(scoreStore.get(i).getSubjectId())){
@@ -294,7 +294,7 @@ public class Main {
                         
                         // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
                         for(int k=0;k<scoreStore.size();k++){
-                            System.out.println(Arrays.toString(scoreStore.get(k).getScores()) + ", "+ scoreStore.get(k).getStudentId());
+                            System.out.println(Arrays.toString(scoreStore.get(k).getScores()) + ", "+ scoreStore.get(k).getStudentId()+", "+scoreStore.get(k).getSubjectId());
                         }
                         return;
                     }
@@ -315,7 +315,7 @@ public class Main {
 
         // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
         for(int i=0;i<scoreStore.size();i++){
-            System.out.println(Arrays.toString(scoreStore.get(i).getScores())+", "+ scoreStore.get(i).getStudentId());
+            System.out.println(Arrays.toString(scoreStore.get(i).getScores())+", "+ scoreStore.get(i).getStudentId()+", "+scoreStore.get(i).getSubjectId());
         }
 
         System.out.println("\n점수 등록 성공!");
