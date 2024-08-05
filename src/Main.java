@@ -284,11 +284,39 @@ public class Main {
 
     // 수강생 목록 조회
     private static void inquireStudent() {
-        System.out.println("\n수강생 목록:");
-        for (Student student : studentStore) {
-            System.out.println("ID: " + student.getStudentId() + ", 이름: " + student.getStudentName() +
-                    ", 상태: " + student.getStatus() + ", 과목: " + getSubjectNames(student.getSubjects()));
+        System.out.println("\n수강생 목록을 조회합니다...");
+        System.out.println("상태별 조회는 1을, 전체 목록 보기는 2번을 눌러주세요.");
+        int StudentSearch = sc.nextInt();
+        sc.nextLine();
+
+        if (StudentSearch == 1) {
+            inquireStudentsByStatus();
+        } else if (StudentSearch == 2) {
+            inquireAllStudents();
+        } else {
+            System.out.println("잘못된 입력.");
         }
+
+        System.out.println("\n수강생 목록 조회 성공!");
+    }
+
+    private static void inquireAllStudents() {
+        if (studentStore.isEmpty()) {
+            System.out.println("등록된 수강생이 없습니다.");
+        } else {
+            for (Student student : studentStore) {
+                System.out.println("==================================");
+                System.out.println("이름 :" + student.getStudentName());
+                System.out.println("고유 번호 :" + student.getStudentId());
+                System.out.println("상태 :" + student.getStatus());
+                System.out.println("수강 과목 :" + student.getSubjects());
+                System.out.println("==================================");
+            }
+        }
+    }
+
+    private static void inquireStudentsByStatus() {
+        System.out.println("상태별 수강생 목록을 조회합니다...");
     }
 
     // 과목 ID 리스트를 받아 과목 이름 리스트를 반환하는 메서드
