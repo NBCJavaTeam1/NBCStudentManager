@@ -3,16 +3,21 @@ package model;
 import java.util.Arrays;
 
 public class Score {
-    private Long studentsId; //학생 고유번호를 받아야 한다.
+
+    // 회차를 이 변수로 관리해도 괜찮을 것 같습니다.
+    public static final int round = 10;
+
+    private Long studentId; //학생 고유번호를 받아야 한다.
     private Long subjectId; // 과목 고유번호
 
-    int[] scores = new int[10]; // 10회차 점수배열, 각 배열의 인덱스가 회차이다 -> scores[0]는 1회차 시험 점수
-    char[] ranks = new char[10]; // 10회차 등급배열, ranks[0]는 1회차 시험 등급
+    private int[] scores = new int[round]; // 10회차 점수배열, 각 배열의 인덱스가 회차이다 -> scores[0]는 1회차 시험 점수
+    private char[] ranks = new char[round]; // 10회차 등급배열, ranks[0]는 1회차 시험 등급
 
-    Score(Long studentNumber){
+    Score(Long studentId, Long subjectId){
         Arrays.fill(this.scores, -1);// 입력되지 않은 값은 -1로 한다. 기본 초기화값이 0인데, 0점을 받는 학생도 있을 수 있기 때문
         Arrays.fill(this.ranks, ' ');
-        this.studentsId = studentNumber;
+        this.studentId = studentId;
+        this.subjectId = subjectId;
     }
 
 
@@ -40,4 +45,27 @@ public class Score {
 
     }
 
+    public Long getStudentId(){
+        return this.studentId;
+    }
+
+    public Long getSubjectId(){
+        return this.subjectId;
+    }
+
+    public int[] getScores() {
+        return scores;
+    }
+
+    public void setScores(int[] score){
+        this.scores = score;
+    }
+
+    public char[] getRank() {
+        return ranks;
+    }
+
+    public void setRank(char[] ranks){
+        this.ranks = ranks;
+    }
 }
