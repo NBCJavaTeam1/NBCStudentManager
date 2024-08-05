@@ -60,7 +60,6 @@ public class Main {
         scoreStore.add(new Score(0L, 1L));
         scoreStore.add(new Score(1L, 2L));
 
-        dataManager.saveDatas("score", scoreStore);
         studentStore = dataManager.loadDatas("student", Student.class);
         scoreStore = dataManager.loadDatas("score", Score.class);
 
@@ -141,7 +140,7 @@ public class Main {
         }
     }
 
-    private static void displayMainView() throws InterruptedException {
+    private static void displayMainView() throws Exception {
         boolean flag = true;
         while (flag) {
             System.out.println("\n==================================");
@@ -162,6 +161,7 @@ public class Main {
                 }
             }
         }
+        preExit();
         System.out.println("프로그램을 종료합니다.");
     }
 
@@ -379,9 +379,12 @@ public class Main {
         return foundSubject;
     }
 
-    private static void preExit() {
-
+    // 종료 전 데이터 저장
+    private static void preExit() throws Exception {
+        dataManager.saveDatas("score", scoreStore);
+        dataManager.saveDatas("student", studentStore);
     }
+
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject() {
         try {
