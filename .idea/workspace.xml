@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="74fe86b5-5c6a-4332-b39c-cae5351fa10b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NBCStudentManager/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NBCStudentManager/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Score.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Score.java" afterDir="false" />
-    </list>
+    <list default="true" id="74fe86b5-5c6a-4332-b39c-cae5351fa10b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -70,7 +65,7 @@
       <workItem from="1722495991706" duration="130000" />
       <workItem from="1722566663029" duration="4438000" />
       <workItem from="1722581133847" duration="8784000" />
-      <workItem from="1722829961912" duration="18767000" />
+      <workItem from="1722829961912" duration="19005000" />
     </task>
     <servers />
   </component>
