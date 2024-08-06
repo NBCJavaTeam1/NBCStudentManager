@@ -500,7 +500,7 @@ public class Main {
         return sId;
     }
 
-    private static String getSubjectId(String studentId) throws Exception {
+    private static void getSubjectId(String studentId) throws Exception {
 
         // 타입이 안맞아서 안나오기 때문에 형변환이 필요함
         Long longStudentId = Long.parseLong(studentId);
@@ -517,10 +517,6 @@ public class Main {
 
         matchingSubjects.forEach(subject ->
                 System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName()));
-
-        System.out.print("수정하실 과목을 입력하세요.\n");
-
-        return sc.next();
     }
 
     // 수강생의 과목별 시험 회차 및 점수 등록
@@ -695,7 +691,11 @@ public class Main {
             // 없는 학생을 조회하는 경우 exception
             String insertSubjectId;
             try {
-                insertSubjectId = getSubjectId(insertStudentId);
+                getSubjectId(insertStudentId);
+
+                System.out.print("수정하실 과목을 입력하세요.\n");
+
+                insertSubjectId = sc.next();
 
                 if(!checkPattern(PATTERN_ONLY_INTEGER, insertSubjectId)) {
                     System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
