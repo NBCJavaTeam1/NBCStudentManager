@@ -2,7 +2,11 @@ import model.Score;
 import model.Student;
 import model.Subject;
 
+import javax.swing.text.html.Option;
+import java.sql.Array;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Notification
@@ -13,6 +17,15 @@ import java.util.*;
  * 구현에 도움을 주기위한 Base 프로젝트입니다. 자유롭게 이용해주세요!
  */
 public class Main {
+
+    // 숫자만 입력가능 패턴
+    private static String PATTERN_ONLY_INTEGER = "\\d+";
+    // 1~10 까지만 입력가능 패턴
+    private static String PATTERN_ONLY_1_BETWEEN_10 = "^(10|[1-9])$";
+    // 0~100 까지만 입력가능 패턴
+    private static String PATTERN_ONLY_0_BETWEEN_100 = "^(100|[1-9]?[0-9])$";
+
+
     // 오류방지용 임시 객체
     private static List<Long> tmpSubjects = new ArrayList<Long>();
 
@@ -20,6 +33,9 @@ public class Main {
     private static List<Student> studentStore;
     private static List<Subject> subjectStore;
     private static List<Score> scoreStore;
+
+    // json load save 객체
+    private static DataManager dataManager;
 
     // 과목 타입
     private static String SUBJECT_TYPE_MANDATORY = "MANDATORY";
@@ -36,8 +52,9 @@ public class Main {
     // 스캐너
     private static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         setInitData();
+
         try {
             displayMainView();
         } catch (Exception e) {
@@ -46,8 +63,21 @@ public class Main {
     }
 
     // 초기 데이터 생성
-    private static void setInitData() {
-        studentStore = new ArrayList<>();
+    private static void setInitData() throws Exception {
+        dataManager = new DataManager();
+        dataManager.directoryInitialize();
+
+        studentStore = dataManager.loadDatas("student", Student.class);
+        scoreStore = dataManager.loadDatas("score", Score.class);
+
+        if(scoreStore == null) {
+            scoreStore = new ArrayList<>();
+        }
+
+        if(studentStore == null) {
+            studentStore = new ArrayList<>();
+        }
+
         tmpSubjects = List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L );
         subjectStore = List.of(
                 new Subject(
@@ -96,7 +126,7 @@ public class Main {
                         Subject.SUBJECT_TYPE.SUBJECT_TYPE_CHOICE
                 )
         );
-        scoreStore = new ArrayList<>();
+
     }
 
     // index 자동 증가
@@ -115,7 +145,7 @@ public class Main {
         }
     }
 
-    private static void displayMainView() throws InterruptedException {
+    private static void displayMainView() throws Exception {
         boolean flag = true;
         while (flag) {
             System.out.println("\n==================================");
@@ -136,6 +166,7 @@ public class Main {
                 }
             }
         }
+        preExit();
         System.out.println("프로그램을 종료합니다.");
     }
 
@@ -539,7 +570,7 @@ public class Main {
 
                         // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
                         for(int k=0;k<scoreStore.size();k++){
-                            System.out.println(Arrays.toString(scoreStore.get(k).getRank()) + ", "+ scoreStore.get(k).getStudentId()+", "+scoreStore.get(k).getSubjectId());
+                            System.out.println(Arrays.toString(scoreStore.get(k).getScores()) + ", "+ scoreStore.get(k).getStudentId()+", "+scoreStore.get(k).getSubjectId());
                         }
                         return;
                     }
@@ -560,7 +591,7 @@ public class Main {
 
         // 각 학생의 회차 점수들이 리스트에 제대로 등록되는지 확인하기 위한 반복문
         for(int i=0;i<scoreStore.size();i++){
-            System.out.println(Arrays.toString(scoreStore.get(i).getRank())+", "+ scoreStore.get(i).getStudentId()+", "+scoreStore.get(i).getSubjectId());
+            System.out.println(Arrays.toString(scoreStore.get(i).getScores())+", "+ scoreStore.get(i).getStudentId()+", "+scoreStore.get(i).getSubjectId());
         }
 
         System.out.println("\n점수 등록 성공!");
