@@ -377,7 +377,32 @@ public class Main {
     }
 
     private static void inquireStudentsByStatus() {
-        System.out.println("상태별 수강생 목록을 조회합니다...");
+        System.out.print("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
+        String status = sc.next().toUpperCase();
+
+        if (!status.equals("GREEN") && !status.equals("RED") && !status.equals("YELLOW")) {
+            System.out.println("잘못된 입력입니다.");
+            return;
+        }
+
+        boolean found = false;
+        for (Student student : studentStore) {
+            if (student.getStatus().equalsIgnoreCase(status)) {
+                if (!found) {
+                    System.out.println("\n상태가 " + status + "인 수강생 목록:");
+                    found = true;
+                }
+                System.out.println("==================================");
+                System.out.println("이름: " + student.getStudentName());
+                System.out.println("고유 번호: " + student.getStudentId());
+                System.out.println("수강 과목: " + getSubjectNames(student.getSubjects()));
+                System.out.println("==================================");
+            }
+        }
+
+        if (!found) {
+            System.out.println("해당 상태의 수강생이 없습니다.");
+        }
     }
 
     // 과목 ID 리스트를 받아 과목 이름 리스트를 반환하는 메서드
