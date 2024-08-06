@@ -23,7 +23,7 @@ public class Main {
     // 1~10 까지만 입력가능 패턴
     private static String PATTERN_ONLY_1_BETWEEN_10 = "^(10|[1-9])$";
     // 0~100 까지만 입력가능 패턴
-    private static String PATTERN_ONLY_0_BETWEEN_100 = "^(100|[1-9]?[0-9])$";
+    private static String PATTERN_ONLY_0_BETWEEN_100 = "^(100|[1-9]?[0-9]|0)$";
 
 
     // 오류방지용 임시 객체
@@ -474,17 +474,15 @@ public class Main {
         return sId;
     }
 
-    private static String getSubjectId(String studentId) {
-
-        System.out.print("수정하실 과목을 입력하세요.\n");
+    private static String getSubjectId(String studentId) throws Exception {
 
         // 타입이 안맞아서 안나오기 때문에 형변환이 필요함
         Long longStudentId = Long.parseLong(studentId);
 
-        List<Long> studentSubjects  = studentStore.stream()
-                .filter(student -> student.getStudentId().equals(longStudentId))
-                .map(Student::getSubjects)
-                .findFirst().get();
+         List<Long> studentSubjects = studentStore.stream()
+                 .filter(student -> student.getStudentId().equals(longStudentId))
+                 .map(Student::getSubjects)
+                 .findFirst().orElseThrow(() -> new Exception("존재하지 않는 학생입니다."));
 
         // subjectIndex 값이 ids 리스트에 있는 Subject를 찾기
         List<Subject> matchingSubjects = subjectStore.stream()
@@ -493,6 +491,8 @@ public class Main {
 
         matchingSubjects.forEach(subject ->
                 System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName()));
+
+        System.out.print("수정하실 과목을 입력하세요.\n");
 
         return sc.next();
     }
@@ -621,17 +621,25 @@ public class Main {
                 break;
             }
 
-            String insertSubjectId = getSubjectId(insertStudentId);
-            if(!checkPattern(PATTERN_ONLY_INTEGER, insertSubjectId)) {
-                System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
+            // 없는 학생을 조회하는 경우 exception
+            String insertSubjectId;
+            try {
+                insertSubjectId = getSubjectId(insertStudentId);
+
+                if(!checkPattern(PATTERN_ONLY_INTEGER, insertSubjectId)) {
+                    System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
+                    break;
+                }
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+                flag = false;
                 break;
             }
 
             // issue 숫자 5입력시 오류 발생
             System.out.print("\n수정하실 과목을 시험회차를 입력하세요. (1~10 회차 중 선택)");
             int insertRound = sc.nextInt();
-            sc.nextLine();
-            if(!checkPattern(PATTERN_ONLY_1_BETWEEN_10, String.valueOf(insertSubjectId))) {
+            if(!checkPattern(PATTERN_ONLY_1_BETWEEN_10, String.valueOf(insertRound))) {
                 System.out.println("잘못된 입력 형태입니다. 시험회차는 1~10 까지의 숫자만 입력가능합니다.\n이전 단계로 이동...");
                 break;
             }
@@ -661,7 +669,7 @@ public class Main {
                         System.out.println("\n점수 수정 성공!");
                         return true;
                     }).orElseGet(() -> {
-                        System.out.println("해당 학생이나 과목을 찾을 수 없습니다.");
+                        System.out.println("해당 과목을 찾을 수 없습니다.");
                         return false;
                     });
 
