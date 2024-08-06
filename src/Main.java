@@ -144,7 +144,6 @@ public class Main {
                 return scoreIndex++;
             }
         }
-        System.out.println();
     }
 
     private static void displayMainView() throws Exception {
