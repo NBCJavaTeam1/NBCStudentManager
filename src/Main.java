@@ -75,7 +75,11 @@ public class Main {
 
         if(scoreStore == null) {
             scoreStore = new ArrayList<>();
+        } else {
+            // 정렬 후 저장을 진행할 경우 맨 뒷번호 다음부터 학생 고유번호를 시작하면 된다.
+            studentIndex = studentStore.getLast().getStudentId() + 1;
         }
+
 
         if(studentStore == null) {
             studentStore = new ArrayList<>();
@@ -831,6 +835,8 @@ public class Main {
 
     // 종료 전 데이터 저장
     private static void preExit() throws Exception {
+        scoreStore.sort(Comparator.comparingLong(Score::getStudentId));
+
         dataManager.saveDatas("score", scoreStore);
         dataManager.saveDatas("student", studentStore);
     }
