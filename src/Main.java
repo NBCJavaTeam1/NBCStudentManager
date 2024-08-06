@@ -55,6 +55,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         setInitData();
 
+        // issue : try catch문 위치 변경
         try {
             displayMainView();
         } catch (Exception e) {
@@ -67,6 +68,7 @@ public class Main {
         dataManager = new DataManager();
         dataManager.directoryInitialize();
 
+        // issue : 학생 정보 불러올 때, 고유 번호 인덱스 늘려줘야함
         studentStore = dataManager.loadDatas("student", Student.class);
         scoreStore = dataManager.loadDatas("score", Score.class);
 
@@ -228,6 +230,7 @@ public class Main {
 
                 // 사용자가 필수 과목의 ID를 입력
                 System.out.print("필수 과목 ID를 선택하세요: ");
+                // issue : 문자열 입력시 프로그램 종료 이슈
                 Long selectedSubjectId = sc.nextLong();
 
                 // 선택한 과목이 유효한지 확인
@@ -297,6 +300,7 @@ public class Main {
         }
 
         // 수강생 생성 및 저장
+        // issue : 수강생 정보 등록시 고유번호 충돌 처리
         Student newStudent = new Student(sequence(INDEX_TYPE_STUDENT), studentName, selectedSubjects, studentStatus);
         studentStore.add(newStudent);
         System.out.println("\n수강생 등록이 완료되었습니다.");
@@ -504,6 +508,7 @@ public class Main {
         int round;
         int score;
 
+        // issue : 존재하지 않는 수강생 고유번호가 들어올 경우 예외처리
         while(true){ // 올바른 과목명을 입력할 때 까지 무한 반복
             boolean scoreflag = false; // 올바른 과목명일 경우 true로 만들어 반복문을 탈출하기 위한 flag
             System.out.println("등록할 과목을 입력하세요 : ");
@@ -529,7 +534,7 @@ public class Main {
                 System.out.println("등록할 회차를 입력하세요 : ");
                 round = sc.nextInt()-1;
                 sc.nextLine();
-                if(round<0 || round > 9){
+                if(round < 0 || round > 9){
                     System.out.println("1부터 10까지의 숫자 중 하나를 입력하세요");
                     continue;
                 }
@@ -545,6 +550,7 @@ public class Main {
         while(true){
             try{
                 System.out.println("등록할 점수를 입력하세요 : ");
+                // issue : 문자열 입력시 오류 체크
                 score = sc.nextInt();
                 sc.nextLine();
                 if(score<0 || score>100){
@@ -563,6 +569,7 @@ public class Main {
         s.setScores(round,score);
         if(!scoreStore.isEmpty()){
             for(int i=0;i<scoreStore.size();i++){
+                // issue : 해당 학생이 듣고 있는지에 대한 여부 체크 ( isBeInClass )
                 if(studentId.equals(scoreStore.get(i).getStudentId()) && subId.equals(scoreStore.get(i).getSubjectId())){
                     int[] tempS = Arrays.copyOf(scoreStore.get(i).getScores(), scoreStore.get(i).getScores().length);
                     if(tempS[round]!=-1){
@@ -620,20 +627,26 @@ public class Main {
                 break;
             }
 
+            // issue 숫자 5입력시 오류 발생
             System.out.print("\n수정하실 과목을 시험회차를 입력하세요. (1~10 회차 중 선택)");
             int insertRound = sc.nextInt();
+            sc.nextLine();
             if(!checkPattern(PATTERN_ONLY_1_BETWEEN_10, String.valueOf(insertSubjectId))) {
                 System.out.println("잘못된 입력 형태입니다. 시험회차는 1~10 까지의 숫자만 입력가능합니다.\n이전 단계로 이동...");
                 break;
             }
 
+
+            // issue 숫자 1입력시 오류 발생
             System.out.print("\n수정하실 점수를 입력해주세요.");
             int insertScore = sc.nextInt();
+            sc.nextLine();
             if(!checkPattern(PATTERN_ONLY_0_BETWEEN_100, String.valueOf(insertScore))) {
                 System.out.println("잘못된 입력 형태입니다. 점수는 0~100 까지의 숫자만 입력가능합니다.\n이전 단계로 이동...");
                 break;
             }
-
+            
+            // issue : 시험본 이력이 없는 경우 체크
             boolean checkStudentSubject = scoreStore.stream()
                     .filter(score -> Long.parseLong(insertStudentId) == (score.getStudentId()) &&
                             Long.parseLong(insertSubjectId) == (score.getSubjectId()))
@@ -680,7 +693,7 @@ public class Main {
     }
 
     // 해당 학생 정보와 과목 정보를 사용하는 Score객체를 반환하는 함수
-    private static Score findScoreByStudentIDSubjectId(long studentId, long subjectId) {
+    private static Score findScoreByStudentIDSubjectId(long subjectId, long studentId) {
         Score[] result = scoreStore.stream()
                 .filter((s) ->s.getSubjectId().equals(subjectId) && s.getStudentId().equals(studentId))
                 .toArray(Score[]::new);
@@ -747,6 +760,7 @@ public class Main {
     private static void inquireRoundGradeBySubject() {
         try {
             Student student = getStudentByInput();
+            // 무슨 강의 듣고 있는지 확인
             Subject foundSubject = getSubjectByInput();
             Score subjectScore = findScoreByStudentIDSubjectId(foundSubject.getSubjectId(), student.getStudentId());
 
