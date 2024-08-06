@@ -157,7 +157,15 @@ public class Main {
             System.out.println("2. 점수 관리");
             System.out.println("3. 프로그램 종료");
             System.out.print("관리 항목을 선택하세요...");
-            int input = sc.nextInt();
+            int input;
+            // 수정됨: 처음 화면에서 문자열 입력시 강제종료되지 않음
+            try {
+                input = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("잘못된 입력입니다. 숫자를 입력해주세요.");
+                sc.next(); // 잘못된 입력을 소비하여 다음 입력을 받을 수 있도록 함
+                continue; // 루프를 계속 실행하도록 설정
+            }
 
             switch (input) {
                 case 1 -> displayStudentView(); // 수강생 관리
@@ -183,7 +191,16 @@ public class Main {
             System.out.println("3. 수강생 상태 수정");  // 수정됨: 상태 수정 옵션 추가
             System.out.println("4. 메인 화면 이동");  // 수정됨: 메뉴 번호 조정
             System.out.print("관리 항목을 선택하세요...");
-            int input = sc.nextInt();
+            int input;
+
+            // 수정됨: 문자열 입력시 강제종료되지 않게 try-catch문 추가
+            try {
+                input = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("잘못된 입력입니다. 숫자를 입력해주세요.");
+                sc.next(); // 잘못된 입력을 소비하여 다음 입력을 받을 수 있도록 함
+                continue; // 루프를 계속 실행하도록 설정
+            }
 
             switch (input) {
                 case 1 -> createStudent(); // 수강생 등록
