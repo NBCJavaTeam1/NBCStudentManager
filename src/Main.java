@@ -800,8 +800,18 @@ public class Main {
         return result[0];
     }
 
+    // 과목번호 입력받는 함수
+    private static long getSubjectId() throws Exception {
+        System.out.println("과목 번호를 입력해 주세요 : ");
+
+        long subjectId = sc.nextLong();
+        sc.nextLine();
+
+        return subjectId;
+    }
+
     // 해당 학생 정보와 과목 정보를 사용하는 Score객체를 반환하는 함수
-    private static Score findScoreByStudentIDSubjectId(long subjectId, long studentId) {
+    private static Score findScoreByStudentIDSubjectId(long subjectId, long studentId) throws Exception {
         Score[] result = scoreStore.stream()
                 .filter((s) ->s.getSubjectId().equals(subjectId) && s.getStudentId().equals(studentId))
                 .toArray(Score[]::new);
@@ -820,6 +830,17 @@ public class Main {
                 .findAny();
 
         return subject.orElse(null);
+    }
+
+    // 회차 입력받는 함수
+    private static int getRoundByInput() throws Exception {
+        int round = Integer.parseInt(getRound());
+
+        if (round < 1 || round > Score.round) {
+            throw new Exception("회차를 확인해주세요.");
+        }
+
+        return round;
     }
 
     // 해당 강의를 수강중 인지 확인
@@ -847,15 +868,18 @@ public class Main {
     }
 
     // 사용자로부터 입력받은 내용을 토대로 과목 객체를 찾아 반환하는 함수
-    private static Subject getSubjectByInput() throws Exception {
-        String subjectName = getSubjectName();
-        Subject foundSubject = findSubjectByName(subjectName);
+    private static Subject getSubjectByInput(Student student) throws Exception {
+        getSubjectId(String.valueOf(student.getStudentId()));
 
-        if (foundSubject == null) {
-            throw new Exception("강의가 존재하지 않습니다.");
-        }
+        long subjectId = getSubjectId();
+        List<Long> inSubjects = student.getSubjects();
 
-        return foundSubject;
+        Long result = inSubjects.stream()
+                .filter((l)->l.equals(subjectId))
+                .findFirst()
+                .orElseThrow(()->new Exception("강의 번호를 확인해주세요."));
+
+        return findSubjectById(result);
     }
 
     // 종료 전 데이터 저장
@@ -870,31 +894,16 @@ public class Main {
     private static void inquireRoundGradeBySubject() {
         try {
             Student student = getStudentByInput();
-            // 무슨 강의 듣고 있는지 확인
-            Subject foundSubject = getSubjectByInput();
+            Subject foundSubject = getSubjectByInput(student);
             Score subjectScore = findScoreByStudentIDSubjectId(foundSubject.getSubjectId(), student.getStudentId());
-
-            if (subjectScore == null) {
-                throw new Exception("해당 과목 시험을 본 이력이 존재하지 않습니다.");
-            }  // 해당 강의를 수강중인지 확인하는 함수
-            else if (!isBeInClass(student, foundSubject)) {
-                throw new Exception(student.getStudentName() + " 학생은 " + foundSubject.getSubjectName() + " 강의를 수강하지 않습니다");
-            }
-
-            // 회차 입력 후 확인하는 함수
-            int round = Integer.parseInt(getRound());
-            if (round < 1 || round > Score.round) {
-                throw new Exception("회차를 확인해주세요.");
-            }
+            int round = getRoundByInput() - 1;
 
             // 회차 점수 확인
-            int roundScore = subjectScore.getScores()[round - 1];
-            if (roundScore == -1) {
+            if (subjectScore.getScores()[round] == -1) {
                 throw new Exception("해당 회차의 시험을 본 이력이 존재하지 않습니다.");
             }
 
-            System.out.printf("%s의 %s과목 %d회차 등급은 %c입니다.", student.getStudentName(), foundSubject.getSubjectName(), round, subjectScore.getRank()[round]);
-
+            System.out.printf("%s의 %s과목 %d회차 등급은 %c입니다.", student.getStudentName(), foundSubject.getSubjectName(), round + 1, subjectScore.getRank()[round]);
         } catch (Exception ex) {
             System.out.println("Error : " + ex.toString());
         }
