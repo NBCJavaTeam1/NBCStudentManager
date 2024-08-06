@@ -890,10 +890,15 @@ public class Main {
         dataManager.saveDatas("student", studentStore);
     }
 
+    private static void showStudentInfo(Student student) {
+        System.out.println("고유번호 : " + student.getStudentId() + " 이름 : " + student.getStudentName());
+    }
+
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject() {
         try {
             Student student = getStudentByInput();
+            showStudentInfo(student);
             Subject foundSubject = getSubjectByInput(student);
             Score subjectScore = findScoreByStudentIDSubjectId(foundSubject.getSubjectId(), student.getStudentId());
             int round = getRoundByInput() - 1;
