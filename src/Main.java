@@ -1,3 +1,4 @@
+import com.google.gson.internal.bind.util.ISO8601Utils;
 import model.Score;
 import model.Student;
 import model.Subject;
@@ -156,7 +157,15 @@ public class Main {
             System.out.println("2. 점수 관리");
             System.out.println("3. 프로그램 종료");
             System.out.print("관리 항목을 선택하세요...");
-            int input = sc.nextInt();
+            int input;
+            // 수정됨: 처음 화면에서 문자열 입력시 강제종료되지 않음
+            try {
+                input = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("잘못된 입력입니다. 숫자를 입력해주세요.");
+                sc.next(); // 잘못된 입력을 소비하여 다음 입력을 받을 수 있도록 함
+                continue; // 루프를 계속 실행하도록 설정
+            }
 
             switch (input) {
                 case 1 -> displayStudentView(); // 수강생 관리
@@ -172,7 +181,7 @@ public class Main {
         System.out.println("프로그램을 종료합니다.");
     }
 
-    private static void displayStudentView() {
+    private static void displayStudentView() throws Exception {
         boolean flag = true;
         while (flag) {
             System.out.println("==================================");
@@ -182,23 +191,36 @@ public class Main {
             System.out.println("3. 수강생 상태 수정");  // 수정됨: 상태 수정 옵션 추가
             System.out.println("4. 메인 화면 이동");  // 수정됨: 메뉴 번호 조정
             System.out.print("관리 항목을 선택하세요...");
-            int input = sc.nextInt();
+            int input;
 
-            switch (input) {
-                case 1 -> createStudent(); // 수강생 등록
-                case 2 -> inquireStudent(); // 수강생 목록 조회
-                case 3 -> updateStudentStatus(); // 수정됨: 수강생 상태 수정 추가
-                case 4 -> flag = false; // 수정됨: 메인 화면 이동 번호 조정
-                default -> {
-                    System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
-                    flag = false;
+            // 수정됨: 문자열 입력시 강제종료되지 않게 try-catch문 추가
+            try {
+                input = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("잘못된 입력입니다. 숫자를 입력해주세요.");
+                sc.next(); // 잘못된 입력을 소비하여 다음 입력을 받을 수 있도록 함
+                continue; // 루프를 계속 실행하도록 설정
+            }
+
+            try {
+                switch (input) {
+                    case 1 -> createStudent(); // 수강생 등록
+                    case 2 -> inquireStudent(); // 수강생 목록 조회
+                    case 3 -> updateStudentStatus(); // 수정됨: 수강생 상태 수정 추가
+                    case 4 -> flag = false; // 수정됨: 메인 화면 이동 번호 조정
+                    default -> {
+                        System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
+                        flag = false;
+                    }
                 }
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
             }
         }
     }
 
     // 과목 선택 루프
-    private static void createStudent() {
+    private static void createStudent() throws Exception {
         // 수강생 이름 입력
         System.out.println("\n수강생을 등록합니다...");
         System.out.print("수강생 이름 입력: ");
@@ -454,15 +476,19 @@ public class Main {
             System.out.print("관리 항목을 선택하세요...");
             int input = sc.nextInt();
 
-            switch (input) {
-                case 1 -> createScore(); // 수강생의 과목별 시험 회차 및 점수 등록
-                case 2 -> updateRoundScoreBySubject(); // 수강생의 과목별 회차 점수 수정
-                case 3 -> inquireRoundGradeBySubject(); // 수강생의 특정 과목 회차별 등급 조회
-                case 4 -> flag = false; // 메인 화면 이동
-                default -> {
-                    System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
-                    flag = false;
+            try {
+                switch (input) {
+                    case 1 -> createScore(); // 수강생의 과목별 시험 회차 및 점수 등록
+                    case 2 -> updateRoundScoreBySubject(); // 수강생의 과목별 회차 점수 수정
+                    case 3 -> inquireRoundGradeBySubject(); // 수강생의 특정 과목 회차별 등급 조회
+                    case 4 -> flag = false; // 메인 화면 이동
+                    default -> {
+                        System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
+                        flag = false;
+                    }
                 }
+            } catch(Exception ex){
+                System.out.println(ex.getMessage());
             }
         }
     }
