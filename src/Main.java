@@ -27,7 +27,6 @@ public class Main {
     // 0~100 까지만 입력가능 패턴
     private static String PATTERN_ONLY_0_BETWEEN_100 = "^(100|[1-9]?[0-9]|0)$";
 
-
     // 오류방지용 임시 객체
     private static List<Long> tmpSubjects = new ArrayList<Long>();
 
@@ -40,17 +39,12 @@ public class Main {
     private static DataManager dataManager;
     private static DummyDataFactory dummyDataFactory;
 
-    // 과목 타입
-    private static String SUBJECT_TYPE_MANDATORY = "MANDATORY";
-    private static String SUBJECT_TYPE_CHOICE = "CHOICE";
-
     // index 관리 필드
     private static long studentIndex;
     private static final String INDEX_TYPE_STUDENT = "ST";
     private static long subjectIndex;
     private static final String INDEX_TYPE_SUBJECT = "SU";
     private static long scoreIndex;
-    private static final String INDEX_TYPE_SCORE = "SC";
 
     // 스캐너
     private static Scanner sc = new Scanner(System.in);
@@ -58,7 +52,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         setInitData();
 
-        // issue : try catch문 위치 변경
         try {
             displayMainView();
         } catch (Exception e) {
@@ -73,7 +66,6 @@ public class Main {
 
         dummyDataFactory = new DummyDataFactory();
 
-        // issue : 학생 정보 불러올 때, 고유 번호 인덱스 늘려줘야함
         studentStore = dataManager.loadDatas("student", Student.class);
         scoreStore = dataManager.loadDatas("score", Score.class);
 
@@ -436,38 +428,6 @@ public class Main {
             }
         }
         return String.join(", ", subjectNames);
-    }
-
-    // 수강생 상태 수정 (수정됨)
-    private static void updateStudentStatus2() throws Exception {
-        System.out.println("\n수강생 상태를 수정합니다...");
-        System.out.print("수정할 수강생의 ID를 입력하세요: ");
-        String studentId = sc.next();
-        boolean studentFound = false;
-
-        for (Student student : studentStore) {
-            if (student.getStudentId().equals(studentId)) {
-                studentFound = true;
-                System.out.println("현재 상태: " + student.getStatus());
-                System.out.println("새로운 상태를 입력하세요 (Green, Red, Yellow 중 하나): ");
-                String newStatus;
-                while (true) {
-                    newStatus = sc.next().toUpperCase();
-                    if (newStatus.equals("GREEN") || newStatus.equals("RED") || newStatus.equals("YELLOW")) {
-                        student.setStatus(newStatus); // 수정됨: 상태 수정
-                        System.out.println("상태가 수정되었습니다.");
-                        break;
-                    } else {
-                        System.out.println("잘못된 입력입니다. 상태는 Green, Red, Yellow 중 하나여야 합니다.");
-                    }
-                }
-                break;
-            }
-        }
-
-        if (!studentFound) {
-            System.out.println("해당 ID를 가진 수강생을 찾을 수 없습니다.");
-        }
     }
 
     // 과목 ID를 통해 과목을 조회하는 메서드
@@ -844,11 +804,6 @@ public class Main {
 
     }
 
-    private static String getSubjectName() {
-        System.out.print("\n과목 이름을 입력하시오...");
-        return sc.next();
-    }
-
     private static String getRound() {
         System.out.print("\n회차를 입력하시오...");
         return sc.next();
@@ -889,15 +844,6 @@ public class Main {
         return result[0];
     }
 
-    // 이름으로 Subject를 찾아 반환하는 함수
-    private static Subject findSubjectByName(String subjectName) {
-        Optional<Subject> subject = subjectStore.stream()
-                .filter((s)->s.getSubjectName().equals(subjectName))
-                .findAny();
-
-        return subject.orElse(null);
-    }
-
     // 회차 입력받는 함수
     private static int getRoundByInput() throws Exception {
         int round = Integer.parseInt(getRound());
@@ -907,17 +853,6 @@ public class Main {
         }
 
         return round;
-    }
-
-    // 해당 강의를 수강중 인지 확인
-    private static boolean isBeInClass(Student student, Subject subject) {
-        List<Long> subjects = student.getSubjects();
-
-        Long[] result = subjects.stream()
-                .filter((s)->s.equals(subject.getSubjectId()))
-                .toArray(Long[]::new);
-
-        return result.length > 0;
     }
 
     // 수강생의 특정 과목 회차별 등급 조회
@@ -950,7 +885,7 @@ public class Main {
 
     // 종료 전 데이터 저장
     private static void preExit() throws Exception {
-        scoreStore.sort(Comparator.comparingLong(Score::getStudentId));
+        studentStore.sort(Comparator.comparingLong(Student::getStudentId));
 
         dataManager.saveDatas("score", scoreStore);
         dataManager.saveDatas("student", studentStore);
