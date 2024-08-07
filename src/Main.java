@@ -84,7 +84,6 @@ public class Main {
             studentIndex = studentStore.getLast().getStudentId() + 1;
         }
 
-
         if(studentStore == null) {
             studentStore = new ArrayList<>();
         }
@@ -364,7 +363,7 @@ public class Main {
     }
 
     // 수강생 목록 조회
-    private static void inquireStudent() {
+    private static void inquireStudent() throws Exception  {
         System.out.println("\n수강생 목록을 조회합니다...");
         System.out.println("상태별 조회는 1을, 전체 목록 보기는 2번을 눌러주세요.");
         int StudentSearch = sc.nextInt();
@@ -426,7 +425,7 @@ public class Main {
     }
 
     // 과목 ID 리스트를 받아 과목 이름 리스트를 반환하는 메서드
-    private static String getSubjectNames(List<Long> subjectIds) {
+    private static String getSubjectNames(List<Long> subjectIds) throws Exception {
         List<String> subjectNames = new ArrayList<>();
         for (Long id : subjectIds) {
             for (Subject subject : subjectStore) {
@@ -440,7 +439,7 @@ public class Main {
     }
 
     // 수강생 상태 수정 (수정됨)
-    private static void updateStudentStatus2() {
+    private static void updateStudentStatus2() throws Exception {
         System.out.println("\n수강생 상태를 수정합니다...");
         System.out.print("수정할 수강생의 ID를 입력하세요: ");
         String studentId = sc.next();
@@ -472,7 +471,7 @@ public class Main {
     }
 
     // 과목 ID를 통해 과목을 조회하는 메서드
-    private static Subject findSubjectById(Long subjectId) {
+    private static Subject findSubjectById(Long subjectId) throws Exception {
         // 과목 저장소(subjectStore)를 순회하여 해당 ID를 가진 과목을 찾음
         for (Subject subject : subjectStore) {
             if (subject.getSubjectId().equals(subjectId)) {
@@ -482,7 +481,7 @@ public class Main {
         return null;  // 해당 ID의 과목이 없으면 null 반환
     }
 
-    private static void updateStudentStatus() {
+    private static void updateStudentStatus() throws Exception {
         // 수강생 ID 입력
         System.out.print("상태를 수정할 수강생의 ID를 입력하세요: ");
         Long studentId = sc.nextLong();
