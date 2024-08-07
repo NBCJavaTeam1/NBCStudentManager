@@ -548,6 +548,15 @@ public class Main {
         return sId;
     }
 
+    private static void getStudents() {
+
+        // 수강생들의 아이디를 출력
+        for(Student student : studentStore){
+            System.out.println(student.getStudentId() + ". " + student.getStudentName());
+        }
+
+    }
+
     private static void getSubjectId(String studentId) throws Exception {
 
         // 타입이 안맞아서 안나오기 때문에 형변환이 필요함
@@ -565,6 +574,31 @@ public class Main {
 
         matchingSubjects.forEach(subject ->
                 System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName()));
+    }
+
+    private static List<Long> getSubjectId2(String studentId) throws Exception {
+
+        List<Long> studentSubjectId = new ArrayList<>();
+
+        // 타입이 안맞아서 안나오기 때문에 형변환이 필요함
+        Long longStudentId = Long.parseLong(studentId);
+
+        List<Long> studentSubjects = studentStore.stream()
+                .filter(student -> student.getStudentId().equals(longStudentId))
+                .map(Student::getSubjects)
+                .findFirst().orElseThrow(() -> new Exception("존재하지 않는 학생입니다."));
+
+        // subjectIndex 값이 ids 리스트에 있는 Subject를 찾기
+        List<Subject> matchingSubjects = subjectStore.stream()
+                .filter(subject -> studentSubjects.contains((long) subject.getSubjectId()))
+                .collect(Collectors.toList());
+
+        matchingSubjects.forEach(subject -> {
+            System.out.println(subject.getSubjectId() + ". " + subject.getSubjectName());
+            studentSubjectId.add(subject.getSubjectId());
+        });
+
+        return studentSubjectId;
     }
 
     // 수강생의 과목별 시험 회차 및 점수 등록
@@ -730,7 +764,11 @@ public class Main {
                 break;
             }
 
-            String insertStudentId = String.valueOf(getStudentId()); // 관리할 수강생 고유 번호
+            // 학생 목록 출력
+            getStudents();
+
+            System.out.print("\n관리할 수강생의 번호를 입력하시오...");
+            String insertStudentId = sc.next(); // 관리할 수강생 고유 번호
             if(!checkPattern(PATTERN_ONLY_INTEGER, insertStudentId)) {
                 System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
                 break;
@@ -739,7 +777,7 @@ public class Main {
             // 없는 학생을 조회하는 경우 exception
             String insertSubjectId;
             try {
-                getSubjectId(insertStudentId);
+                List<Long> studentSubjectsId = getSubjectId2(insertStudentId);
 
                 System.out.print("수정하실 과목을 입력하세요.\n");
 
@@ -749,6 +787,15 @@ public class Main {
                     System.out.println("잘못된 입력 형태입니다.\n이전 단계로 이동...");
                     break;
                 }
+
+                // 선택한 과목이 학생이 듣는 과목이 맞는지 확인한다
+                Long checkSubject2 = studentSubjectsId.stream()
+                        .filter(subejct -> subejct.equals(Long.parseLong(insertSubjectId)))
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("선택하신 학생이 듣지 않는 과목입니다.\n이전 단계로 이동..."));
+
+                System.out.println(checkSubject2);
+
             } catch(Exception e) {
                 System.out.println(e.getMessage());
                 flag = false;
