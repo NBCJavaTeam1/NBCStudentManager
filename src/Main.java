@@ -1,4 +1,5 @@
 import com.google.gson.internal.bind.util.ISO8601Utils;
+import dummy.DummyDataFactory;
 import model.Score;
 import model.Student;
 import model.Subject;
@@ -37,6 +38,7 @@ public class Main {
 
     // json load save 객체
     private static DataManager dataManager;
+    private static DummyDataFactory dummyDataFactory;
 
     // 과목 타입
     private static String SUBJECT_TYPE_MANDATORY = "MANDATORY";
@@ -68,6 +70,8 @@ public class Main {
     private static void setInitData() throws Exception {
         dataManager = new DataManager();
         dataManager.directoryInitialize();
+
+        dummyDataFactory = new DummyDataFactory();
 
         // issue : 학생 정보 불러올 때, 고유 번호 인덱스 늘려줘야함
         studentStore = dataManager.loadDatas("student", Student.class);
@@ -160,11 +164,13 @@ public class Main {
             System.out.println("1. 수강생 관리");
             System.out.println("2. 점수 관리");
             System.out.println("3. 프로그램 종료");
+            System.out.println("4. 더미데이터 생성");
             System.out.print("관리 항목을 선택하세요...");
             int input;
             // 수정됨: 처음 화면에서 문자열 입력시 강제종료되지 않음
             try {
                 input = sc.nextInt();
+                sc.nextLine();
             } catch (InputMismatchException e) {
                 System.out.println("잘못된 입력입니다. 숫자를 입력해주세요.");
                 sc.next(); // 잘못된 입력을 소비하여 다음 입력을 받을 수 있도록 함
@@ -175,6 +181,7 @@ public class Main {
                 case 1 -> displayStudentView(); // 수강생 관리
                 case 2 -> displayScoreView(); // 점수 관리
                 case 3 -> flag = false; // 프로그램 종료
+                case 4 -> createDummyData(); // 더미데이터 생성
                 default -> {
                     System.out.println("잘못된 입력입니다.\n되돌아갑니다!");
                     Thread.sleep(2000);
@@ -183,6 +190,19 @@ public class Main {
         }
         preExit();
         System.out.println("프로그램을 종료합니다.");
+    }
+
+    private static void createDummyData() throws Exception {
+        System.out.print("Student의 수를 입력해주세요 : ");
+        String input = sc.nextLine();
+        int studentCount = Integer.parseInt(input);
+
+        System.out.print("Score의 수를 입력해주세요 : ");
+        input = sc.nextLine();
+        int scoreCount = Integer.parseInt(input);
+
+        studentStore = dummyDataFactory.createStudentDummyData(studentCount);
+        scoreStore = dummyDataFactory.createScoreDummyData(scoreCount, studentStore);
     }
 
     private static void displayStudentView() throws Exception {
