@@ -395,7 +395,7 @@ public class Main {
         }
     }
 
-    private static void inquireStudentsByStatus() {
+    private static void inquireStudentsByStatus() throws Exception {
         System.out.print("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
         String status = sc.next().toUpperCase();
 
